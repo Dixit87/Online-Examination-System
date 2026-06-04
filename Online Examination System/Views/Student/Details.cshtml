@@ -1,0 +1,132 @@
+@model Online_Examination_System.ViewModels.StudentDetailsViewModel
+@{
+    ViewData["Title"] = "Student Details";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Student Detail Screen</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Student List
+    </a>
+</div>
+
+<div class="row">
+    <!-- Student Information -->
+    <div class="col-lg-12 mb-4">
+        <div class="card premium-card shadow-sm border-0">
+            <div class="card-header py-3 bg-white border-0 border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-person-badge me-2"></i>Student Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 text-center mb-3 mb-md-0">
+                        <img src="https://ui-avatars.com/api/?name=@Model.Student.Name&background=random&color=fff&size=128" class="rounded-circle shadow-sm" alt="Avatar" />
+                    </div>
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="text-muted small fw-bold text-uppercase">Name</label>
+                                <div class="fs-5 text-dark">@Model.Student.Name</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small fw-bold text-uppercase">Email</label>
+                                <div class="fs-5 text-dark">@Model.Student.Email</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small fw-bold text-uppercase">Contact</label>
+                                <div class="fs-5 text-dark">@(string.IsNullOrEmpty(Model.Student.Contact) ? "N/A" : Model.Student.Contact)</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label class="text-muted small fw-bold text-uppercase">Address</label>
+                                <div class="text-dark">@(string.IsNullOrEmpty(Model.Student.Address) ? "No address provided." : Model.Student.Address)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small fw-bold text-uppercase">Registration Date</label>
+                                <div class="text-dark">@Model.Student.CreatedDate.ToString("MMM dd, yyyy")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attempted Exam List -->
+    <div class="col-lg-12">
+        <div class="card premium-card shadow-sm border-0">
+            <div class="card-header py-3 bg-white border-0 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-journal-text me-2"></i>Attempted Exam List</h6>
+                <span class="badge bg-secondary rounded-pill px-3 py-2">Total Exams: @Model.ExamHistory.Count</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 border-white">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Exam Name</th>
+                                <th>Attempt Date</th>
+                                <th>Status</th>
+                                <th>Result</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ExamHistory != null && Model.ExamHistory.Any())
+                            {
+                                foreach (var exam in Model.ExamHistory)
+                                {
+                                    <tr>
+                                        <td><div class="fw-bold text-dark">@exam.ExamTitle</div></td>
+                                        <td>@exam.AttemptDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                        <td>
+                                            @if (exam.Status == "Completed")
+                                            {
+                                                <span class="badge bg-success rounded-pill px-3 py-2">Completed</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">@exam.Status</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (exam.Status == "Completed")
+                                            {
+                                                <div class="fw-bold fs-6">@exam.ResultPercentage.ToString("0.##")%</div>
+                                                <div class="text-muted small">@exam.Score / @exam.TotalMark</div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (exam.Status == "Completed")
+                                            {
+                                                <a href="#" class="btn btn-sm btn-outline-primary rounded-pill shadow-sm px-3">View Result</a>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-light rounded-pill px-3" disabled>Pending</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        This student has not attempted any exams yet.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

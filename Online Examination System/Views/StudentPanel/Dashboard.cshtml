@@ -1,0 +1,106 @@
+@model Online_Examination_System.ViewModels.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Student Dashboard</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm rounded-pill px-3 py-2">
+        <i class="bi bi-person-circle fa-sm text-white-50 me-1"></i> My Profile
+    </a>
+</div>
+
+<!-- Summary Cards Row -->
+<div class="row">
+    <!-- Total Exams Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-primary shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Exams
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalExams</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-journal-text fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Exams Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-success shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Completed Exams
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.CompletedExams</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle-fill fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Exams Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-info shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            In Progress Exams
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.InProgressExams</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-clock-history fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Not Started Exams Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-warning shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Not Started Exams
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.NotStartedExams</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-circle-fill fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome Section -->
+<div class="row mt-3">
+    <div class="col-lg-12">
+        <div class="card premium-card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-person-workspace text-primary mb-3" style="font-size: 4rem;"></i>
+                <h2 class="font-weight-bold text-dark">Welcome to the Student Portal</h2>
+                <p class="text-muted fs-5">Navigate to Exam List to view and attempt available exams.</p>
+                <a href="@Url.Action("Exams", "StudentPanel")" class="btn btn-primary rounded-pill px-4 py-2 mt-2 shadow-sm">
+                    <i class="bi bi-play-circle me-1"></i> View Exam List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

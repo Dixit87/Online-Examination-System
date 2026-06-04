@@ -1,0 +1,181 @@
+@model Online_Examination_System.ViewModels.ExamUpsertViewModel
+@{
+    ViewData["Title"] = Model.ExamId == 0 ? "Create Exam" : "Edit Exam";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">@(Model.ExamId == 0 ? "Create New Exam" : "Edit Exam")</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Exams
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-xl-12 col-lg-12">
+        <form asp-action="Upsert" method="post" id="examForm" onsubmit="return validateExamForm()">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="ExamId" />
+
+            <div class="card premium-card mb-4 shadow-sm border-0">
+                <div class="card-header py-3 bg-white border-0 border-bottom">
+                    <h6 class="m-0 font-weight-bold text-primary">Exam Master</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ExamTypeId" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                            <select asp-for="ExamTypeId" asp-items="Model.ExamTypeList" class="form-select">
+                                <option disabled selected>-- Select Exam Type --</option>
+                            </select>
+                            <span asp-validation-for="ExamTypeId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ExamTitle" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                            <input asp-for="ExamTitle" class="form-control" placeholder="E.g., Midterm Aptitude Test" />
+                            <span asp-validation-for="ExamTitle" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label asp-for="NoOfQuestions" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                            <input asp-for="NoOfQuestions" class="form-control" id="noOfQuestions" onkeyup="calculateTotal()" onchange="calculateTotal()" />
+                            <span asp-validation-for="NoOfQuestions" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PerQuestionMark" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                            <input asp-for="PerQuestionMark" class="form-control" id="perQuestionMark" onkeyup="calculateTotal()" onchange="calculateTotal()" />
+                            <span asp-validation-for="PerQuestionMark" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="TotalMark" class="form-label fw-bold text-primary"></label>
+                            <input asp-for="TotalMark" class="form-control bg-light" id="totalMark" readonly tabindex="-1" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PassingMark" class="form-label fw-bold text-success"></label> <span class="text-danger">*</span>
+                            <input asp-for="PassingMark" class="form-control" id="passingMark" />
+                            <span asp-validation-for="PassingMark" class="text-danger small"></span>
+                            <div id="passingMarkError" class="text-danger small d-none">Passing Mark cannot be greater than Total Mark.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2 form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="activeSwitch">
+                        <label class="form-check-label fw-bold text-dark" for="activeSwitch">Exam is Active</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card premium-card mb-4 shadow-sm border-0">
+                <div class="card-header py-3 bg-white border-0 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Question Mapping</h6>
+                    <span class="badge bg-primary rounded-pill px-3 py-2" id="selectedCountBadge">Selected: 0 / 0</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">Select exactly the number of questions specified in "No Of Questions" above.</p>
+                    
+                    <div class="row">
+                        @for (int i = 0; i < Model.AvailableQuestions.Count; i++)
+                        {
+                            <div class="col-md-12 mb-2">
+                                <div class="form-check p-3 border rounded-3 bg-light hover-shadow-sm transition-all">
+                                    <input type="hidden" asp-for="AvailableQuestions[i].QuestionId" />
+                                    <input type="hidden" asp-for="AvailableQuestions[i].QuestionText" />
+                                    <input asp-for="AvailableQuestions[i].IsSelected" class="form-check-input ms-1 me-3 question-checkbox" type="checkbox" id="q_@i" onchange="updateSelectedCount()">
+                                    <label class="form-check-label w-100" for="q_@i">
+                                        <span class="fw-bold text-dark">Q@(i + 1):</span> @Model.AvailableQuestions[i].QuestionText
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-5 text-end">
+                <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">
+                    <i class="bi bi-save me-1"></i> Save Exam
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function calculateTotal() {
+            var noOfQ = parseFloat(document.getElementById('noOfQuestions').value) || 0;
+            var perMark = parseFloat(document.getElementById('perQuestionMark').value) || 0;
+            var total = noOfQ * perMark;
+            document.getElementById('totalMark').value = total.toFixed(2);
+            
+            updateSelectedCount(); // Update badge max limit text
+        }
+
+        function updateSelectedCount() {
+            var checkboxes = document.querySelectorAll('.question-checkbox');
+            var selected = 0;
+            checkboxes.forEach(function(cb) {
+                if (cb.checked) selected++;
+            });
+            
+            var required = parseInt(document.getElementById('noOfQuestions').value) || 0;
+            var badge = document.getElementById('selectedCountBadge');
+            
+            badge.innerText = "Selected: " + selected + " / " + required;
+            
+            if (selected > required) {
+                badge.className = "badge bg-danger rounded-pill px-3 py-2";
+            } else if (selected == required && required > 0) {
+                badge.className = "badge bg-success rounded-pill px-3 py-2";
+            } else {
+                badge.className = "badge bg-primary rounded-pill px-3 py-2";
+            }
+        }
+
+        function validateExamForm() {
+            var total = parseFloat(document.getElementById('totalMark').value) || 0;
+            var passing = parseFloat(document.getElementById('passingMark').value) || 0;
+            
+            if (passing > total) {
+                document.getElementById('passingMarkError').classList.remove('d-none');
+                document.getElementById('passingMark').focus();
+                return false;
+            } else {
+                document.getElementById('passingMarkError').classList.add('d-none');
+            }
+            
+            var checkboxes = document.querySelectorAll('.question-checkbox');
+            var selected = 0;
+            checkboxes.forEach(function(cb) {
+                if (cb.checked) selected++;
+            });
+            
+            var required = parseInt(document.getElementById('noOfQuestions').value) || 0;
+            
+            if (selected !== required) {
+                alert("You must select exactly " + required + " questions for this exam. You currently have " + selected + " selected.");
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Run on load
+        document.addEventListener("DOMContentLoaded", function() {
+            calculateTotal();
+        });
+    </script>
+    
+    <style>
+        .hover-shadow-sm:hover {
+            box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+            background-color: #fff !important;
+        }
+        .transition-all {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+}

@@ -1,0 +1,44 @@
+@model Online_Examination_System.Models.ExamType
+@{
+    ViewData["Title"] = Model.ExamTypeId == 0 ? "Add Exam Type" : "Edit Exam Type";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">@ViewData["Title"]</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-xl-6 col-lg-8">
+        <div class="card premium-card mb-4">
+            <div class="card-header py-3 bg-white border-0 border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary">Exam Type Details</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Upsert" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="ExamTypeId" />
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-bold">Exam Type Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g. Technical, Aptitude, Theory" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
+                        <label class="form-check-label fw-bold text-dark" for="flexSwitchCheckChecked">Is Active</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

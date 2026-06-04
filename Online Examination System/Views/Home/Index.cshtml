@@ -1,8 +1,160 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model Online_Examination_System.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Dashboard</h1>
 </div>
+
+<!-- Row 1: Users, Students, Exam Types, Questions -->
+<div class="row">
+    <!-- Total Users -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Users</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.TotalUsers</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Students -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Students</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.TotalStudents</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-mortarboard fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Exam Types -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Exam Types</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.TotalExamTypes</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-tags fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Questions -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Questions</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.TotalQuestions</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-question-circle fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Exams, Completed, Passed, Failed -->
+<div class="row">
+    <!-- Total Exams -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Exams</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.TotalExams</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-journal-text fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Exams -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Completed Exams</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.CompletedExams</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Passed Students -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Passed Students</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.PassedStudents</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-trophy fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Failed Students -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card premium-card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Failed Students</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model?.FailedStudents</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-x-circle fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+    .border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+    .border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+    .border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
+    .border-left-danger { border-left: 0.25rem solid #e74a3b !important; }
+    .text-gray-300 { color: #dddfeb !important; }
+    .text-gray-800 { color: #5a5c69 !important; }
+</style>

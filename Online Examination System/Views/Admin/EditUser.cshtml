@@ -1,0 +1,70 @@
+@model Online_Examination_System.ViewModels.UserEditViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Edit User Profile</h1>
+    <a asp-action="Users" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Users
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-xl-8 col-lg-9">
+        <div class="card premium-card mb-4">
+            <div class="card-header py-3 bg-white border-0 border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary">User Details</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditUser" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="UserId" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label fw-bold">Full Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-bold">Email Address</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Contact" class="form-label fw-bold">Contact Number</label>
+                            <input asp-for="Contact" class="form-control" />
+                            <span asp-validation-for="Contact" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Username" class="form-label fw-bold">Username</label>
+                            <input asp-for="Username" class="form-control" />
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label fw-bold">Address</label>
+                        <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked">
+                        <label class="form-check-label fw-bold text-dark" for="flexSwitchCheckChecked">Active Account</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

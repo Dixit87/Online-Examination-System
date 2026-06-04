@@ -1,0 +1,96 @@
+@model Online_Examination_System.ViewModels.RegisterViewModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Student Registration";
+}
+
+<div class="row justify-content-center w-100">
+    <div class="col-xl-6 col-lg-8 col-md-10">
+        <div class="card auth-card">
+            <div class="auth-header">
+                <h3 class="mb-0 fw-bold">Online Examination System</h3>
+                <p class="text-white-50 mb-0">Student Registration</p>
+            </div>
+            <div class="auth-body">
+                <div class="text-center mb-4">
+                    <h4 class="text-dark fw-bold">Create an Account</h4>
+                </div>
+
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Name" class="form-control rounded-pill px-4" placeholder="Full Name" />
+                                <label asp-for="Name" class="ms-2">Full Name</label>
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Email" type="email" class="form-control rounded-pill px-4" placeholder="Email Address" />
+                                <label asp-for="Email" class="ms-2">Email Address</label>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Contact" class="form-control rounded-pill px-4" placeholder="Contact Number" />
+                                <label asp-for="Contact" class="ms-2">Contact Number</label>
+                                <span asp-validation-for="Contact" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Username" class="form-control rounded-pill px-4" placeholder="Username" />
+                                <label asp-for="Username" class="ms-2">Username</label>
+                                <span asp-validation-for="Username" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Password" type="password" class="form-control rounded-pill px-4" placeholder="Password" />
+                                <label asp-for="Password" class="ms-2">Password</label>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="ConfirmPassword" type="password" class="form-control rounded-pill px-4" placeholder="Confirm Password" />
+                                <label asp-for="ConfirmPassword" class="ms-2">Confirm Password</label>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <textarea asp-for="Address" class="form-control rounded-3 px-4" placeholder="Address" style="height: 100px"></textarea>
+                        <label asp-for="Address" class="ms-2">Address</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
+                        Register Account
+                    </button>
+                </form>
+
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <span class="small text-muted">Already have an account?</span>
+                    <a asp-action="Login" class="small text-decoration-none fw-bold">Login Here!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

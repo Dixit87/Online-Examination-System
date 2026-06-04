@@ -1,0 +1,86 @@
+@model IEnumerable<Online_Examination_System.Models.User>
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">User Management</h1>
+    <a asp-action="AddUser" class="btn btn-sm btn-primary shadow-sm rounded-pill px-3 py-2">
+        <i class="bi bi-plus-circle fa-sm text-white-50"></i> Add User
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card premium-card mb-4">
+    <div class="card-header py-3 bg-white border-0 border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">All Registered Users</h6>
+        <form asp-action="Users" method="get" class="d-flex">
+            <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control form-control-sm me-2 rounded-pill px-3" placeholder="Search User...">
+            <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">Search</button>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 border-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(Model != null && Model.Any())
+                    {
+                        foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@user.Name</div>
+                                    <div class="text-muted small">@@@user.Username</div>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>@user.Contact</td>
+                                <td>
+                                    @if(user.IsActive)
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3 py-2 shadow-sm">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-primary fw-bold">Edit</a>
+                                        <form asp-action="ToggleUserStatus" asp-route-id="@user.UserId" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success") fw-bold" style="border-left: 0;">
+                                                @(user.IsActive ? "Deactivate" : "Activate")
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4">No users found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

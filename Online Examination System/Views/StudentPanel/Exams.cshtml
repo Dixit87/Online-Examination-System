@@ -1,0 +1,108 @@
+@model IEnumerable<Online_Examination_System.ViewModels.StudentExamListViewModel>
+@{
+    ViewData["Title"] = "Exam List";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Exam List</h1>
+</div>
+
+<div class="card premium-card mb-4 shadow-sm border-0">
+    <div class="card-header py-3 bg-white border-0 border-bottom">
+        <h6 class="m-0 font-weight-bold text-primary">Available Exams</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 border-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sr</th>
+                        <th>Exam</th>
+                        <th>Total Questions</th>
+                        <th>Attempted</th>
+                        <th>Right</th>
+                        <th>Wrong</th>
+                        <th>Status</th>
+                        <th>Result</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        int sr = 1;
+                        foreach (var exam in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold text-muted">@sr</td>
+                                <td><div class="fw-bold text-dark">@exam.ExamTitle</div></td>
+                                <td>@exam.TotalQuestions</td>
+                                <td>@exam.Attempted</td>
+                                <td class="text-success fw-bold">@exam.RightAnswers</td>
+                                <td class="text-danger fw-bold">@exam.WrongAnswers</td>
+                                <td>
+                                    @if (exam.Status == "Not Started")
+                                    {
+                                        <span class="badge bg-secondary rounded-pill px-3 py-2">Not Started</span>
+                                    }
+                                    else if (exam.Status == "In Progress")
+                                    {
+                                        <span class="badge bg-info text-dark rounded-pill px-3 py-2">In Progress</span>
+                                    }
+                                    else if (exam.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3 py-2">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">@exam.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (exam.Status == "Completed")
+                                    {
+                                        <span class="fw-bold">@exam.ResultPercentage.ToString("0.##")%</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (exam.Status == "Not Started")
+                                    {
+                                        <a href="@Url.Action("TakeExam", "StudentPanel", new { id = exam.ExamId })" class="btn btn-sm btn-primary shadow-sm rounded-pill px-3">
+                                            Start Exam
+                                        </a>
+                                    }
+                                    else if (exam.Status == "In Progress")
+                                    {
+                                        <a href="@Url.Action("TakeExam", "StudentPanel", new { id = exam.ExamId })" class="btn btn-sm btn-warning shadow-sm rounded-pill px-3 text-dark fw-bold">
+                                            Resume Exam
+                                        </a>
+                                    }
+                                    else if (exam.Status == "Completed")
+                                    {
+                                        <a href="@Url.Action("Result", "StudentPanel", new { id = exam.StudentExamId })" class="btn btn-sm btn-outline-info shadow-sm rounded-pill px-3">
+                                            View Result
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                            sr++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                No exams available at the moment.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

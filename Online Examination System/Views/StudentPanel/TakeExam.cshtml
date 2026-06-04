@@ -1,0 +1,195 @@
+@model Online_Examination_System.ViewModels.TakeExamViewModel
+@{
+    ViewData["Title"] = Model.ExamTitle;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">@Model.ExamTitle</h1>
+    <div class="text-muted fw-bold">
+        Question <span id="currentQuestionNum">1</span> of @Model.TotalQuestions
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card premium-card shadow-sm border-0 mb-4">
+            
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="card-body text-center py-5">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="mt-3 text-muted">Loading your exam...</h5>
+            </div>
+
+            <!-- Exam Content -->
+            <div id="examContent" style="display: none;">
+                <div class="card-body p-5">
+                    <h4 class="font-weight-bold text-dark mb-4" id="questionText">
+                        <!-- Question text will be injected here -->
+                    </h4>
+
+                    <div id="optionsContainer" class="d-flex flex-column gap-3">
+                        <!-- Options will be injected here -->
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light border-0 py-3 d-flex justify-content-between align-items-center">
+                    <button id="btnPrev" class="btn btn-outline-secondary px-4 rounded-pill shadow-sm" style="display: none;">
+                        <i class="bi bi-arrow-left me-1"></i> Previous
+                    </button>
+                    
+                    <span id="saveStatus" class="text-success small fw-bold" style="display: none;">
+                        <i class="bi bi-cloud-check-fill me-1"></i> Saved
+                    </span>
+
+                    <button id="btnNext" class="btn btn-primary px-4 rounded-pill shadow-sm ms-auto">
+                        Next <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+
+                    <form id="submitExamForm" asp-action="SubmitExam" asp-controller="StudentPanel" method="post" style="display: none;" class="ms-auto">
+                        <input type="hidden" name="studentExamId" value="@Model.StudentExamId" />
+                        <button type="submit" id="btnSubmit" class="btn btn-success px-4 rounded-pill shadow-sm" onclick="return confirm('Are you sure you want to submit your exam? You cannot change your answers after submission.');">
+                            <i class="bi bi-check-circle me-1"></i> Submit Exam
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let questions = [];
+            let currentIndex = 0;
+            const studentExamId = @Model.StudentExamId;
+            const examId = @Model.ExamId;
+
+            // Fetch Data
+            $.ajax({
+                url: '@Url.Action("GetExamData", "StudentPanel")',
+                type: 'GET',
+                data: { studentExamId: studentExamId, examId: examId },
+                success: function (data) {
+                    questions = data;
+                    if (questions.length > 0) {
+                        $('#loadingIndicator').hide();
+                        $('#examContent').show();
+                        renderQuestion();
+                    } else {
+                        $('#loadingIndicator').html('<h5 class="text-danger">No questions found for this exam.</h5>');
+                    }
+                },
+                error: function () {
+                    $('#loadingIndicator').html('<h5 class="text-danger">Failed to load exam data. Please refresh the page.</h5>');
+                }
+            });
+
+            function renderQuestion() {
+                const q = questions[currentIndex];
+                $('#currentQuestionNum').text(currentIndex + 1);
+                $('#questionText').text(q.questionText);
+
+                let optionsHtml = '';
+                q.options.forEach(function (opt) {
+                    const isChecked = (q.savedOptionId === opt.optionId) ? 'checked' : '';
+                    optionsHtml += `
+                        <div class="form-check custom-radio-card p-3 border rounded">
+                            <input class="form-check-input ms-1 option-radio" type="radio" name="question_${q.questionId}" id="opt_${opt.optionId}" value="${opt.optionId}" ${isChecked}>
+                            <label class="form-check-label w-100 ms-2 fs-5" style="cursor:pointer;" for="opt_${opt.optionId}">
+                                ${opt.optionText}
+                            </label>
+                        </div>
+                    `;
+                });
+                $('#optionsContainer').html(optionsHtml);
+
+                // Update Buttons
+                if (currentIndex === 0) {
+                    $('#btnPrev').hide();
+                } else {
+                    $('#btnPrev').show();
+                }
+
+                if (currentIndex === questions.length - 1) {
+                    $('#btnNext').hide();
+                    $('#submitExamForm').show();
+                } else {
+                    $('#submitExamForm').hide();
+                    $('#btnNext').show();
+                }
+                
+                // Hide save status on new question render
+                $('#saveStatus').hide();
+                
+                // Bind click event to radios for auto-save
+                $('.option-radio').change(function() {
+                    let selectedOptionId = $(this).val();
+                    saveAnswer(q.questionId, selectedOptionId);
+                });
+            }
+
+            function saveAnswer(questionId, selectedOptionId) {
+                // Show saving indicator if desired
+                $('#saveStatus').html('<i class="bi bi-arrow-repeat text-warning me-1"></i> Saving...').show();
+                
+                $.ajax({
+                    url: '@Url.Action("SaveAnswer", "StudentPanel")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        studentExamId: studentExamId,
+                        questionId: questionId,
+                        selectedOptionId: parseInt(selectedOptionId)
+                    }),
+                    success: function () {
+                        // Update local array so it's remembered when navigating back
+                        questions[currentIndex].savedOptionId = parseInt(selectedOptionId);
+                        $('#saveStatus').html('<i class="bi bi-cloud-check-fill text-success me-1"></i> Saved').fadeIn().delay(2000).fadeOut();
+                    },
+                    error: function () {
+                        $('#saveStatus').html('<i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Save Failed').show();
+                        alert('Failed to save answer. Please check your internet connection.');
+                    }
+                });
+            }
+
+            $('#btnNext').click(function () {
+                if (currentIndex < questions.length - 1) {
+                    currentIndex++;
+                    renderQuestion();
+                }
+            });
+
+            $('#btnPrev').click(function () {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    renderQuestion();
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .custom-radio-card {
+            transition: all 0.2s ease-in-out;
+            background-color: #fff;
+        }
+        .custom-radio-card:hover {
+            background-color: #f8f9fa;
+            border-color: #0d6efd !important;
+        }
+        .form-check-input:checked + .form-check-label {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .custom-radio-card:has(.form-check-input:checked) {
+            border-color: #0d6efd !important;
+            background-color: #f0f7ff;
+        }
+    </style>
+}
