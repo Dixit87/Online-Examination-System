@@ -62,24 +62,23 @@ namespace Online_Examination_System.Controllers
                 model.PerQuestionMark = exam.PerQuestionMark;
                 model.TotalMark = exam.TotalMark;
                 model.PassingMark = exam.PassingMark;
+                model.NegativeMark = exam.NegativeMark;
+                model.StartDateTime = exam.StartDateTime;
+                model.EndDateTime = exam.EndDateTime;
                 model.IsActive = exam.IsActive;
 
-                model.AvailableQuestions = activeQuestions.Select(q => new QuestionSelectionViewModel
+                // Pre-populate the hidden field with existing question IDs
+                if (exam.SelectedQuestionIds != null && exam.SelectedQuestionIds.Any())
                 {
-                    QuestionId = q.QuestionId,
-                    QuestionText = q.QuestionText,
-                    IsSelected = exam.SelectedQuestionIds.Contains(q.QuestionId)
-                }).ToList();
+                    model.SelectedQuestionIds = string.Join(",", exam.SelectedQuestionIds);
+                }
             }
-            else
+
+            model.AvailableQuestions = activeQuestions.Select(q => new QuestionSelectionViewModel
             {
-                model.AvailableQuestions = activeQuestions.Select(q => new QuestionSelectionViewModel
-                {
-                    QuestionId = q.QuestionId,
-                    QuestionText = q.QuestionText,
-                    IsSelected = false
-                }).ToList();
-            }
+                QuestionId = q.QuestionId,
+                QuestionText = q.QuestionText
+            }).ToList();
 
             return View(model);
         }
@@ -97,12 +96,28 @@ namespace Online_Examination_System.Controllers
 
             if (ModelState.IsValid)
             {
-                var selectedQuestions = model.AvailableQuestions.Where(q => q.IsSelected).Select(q => q.QuestionId).ToList();
+                var selectedQuestions = new List<int>();
+                if (!string.IsNullOrEmpty(model.SelectedQuestionIds))
+                {
+                    selectedQuestions = model.SelectedQuestionIds.Split(',')
+                                             .Where(x => !string.IsNullOrWhiteSpace(x))
+                                             .Select(int.Parse)
+                                             .ToList();
+                }
 
                 // Validation 1: Passing Mark <= Total Mark
                 if (model.PassingMark > model.TotalMark)
                 {
                     ModelState.AddModelError("PassingMark", "Passing Mark cannot be greater than Total Mark.");
+                    
+                    // Repopulate AvailableQuestions for view render if validation fails
+                    var questions = await _questionRepository.GetAllAsync();
+                    model.AvailableQuestions = questions.Where(q => q.IsActive).Select(q => new QuestionSelectionViewModel
+                    {
+                        QuestionId = q.QuestionId,
+                        QuestionText = q.QuestionText
+                    }).ToList();
+                    
                     return View(model);
                 }
 
@@ -110,6 +125,15 @@ namespace Online_Examination_System.Controllers
                 if (selectedQuestions.Count != model.NoOfQuestions)
                 {
                     ModelState.AddModelError("", $"You must select exactly {model.NoOfQuestions} questions. You currently selected {selectedQuestions.Count}.");
+                    
+                    // Repopulate AvailableQuestions for view render if validation fails
+                    var questions = await _questionRepository.GetAllAsync();
+                    model.AvailableQuestions = questions.Where(q => q.IsActive).Select(q => new QuestionSelectionViewModel
+                    {
+                        QuestionId = q.QuestionId,
+                        QuestionText = q.QuestionText
+                    }).ToList();
+                    
                     return View(model);
                 }
 
@@ -124,6 +148,9 @@ namespace Online_Examination_System.Controllers
                     PerQuestionMark = model.PerQuestionMark,
                     TotalMark = model.TotalMark,
                     PassingMark = model.PassingMark,
+                    NegativeMark = model.NegativeMark,
+                    StartDateTime = model.StartDateTime,
+                    EndDateTime = model.EndDateTime,
                     IsActive = model.IsActive,
                     CreatedBy = currentUserId
                 };
@@ -138,6 +165,14 @@ namespace Online_Examination_System.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Repopulate questions if model state is invalid initially
+            var activeQs = await _questionRepository.GetAllAsync();
+            model.AvailableQuestions = activeQs.Where(q => q.IsActive).Select(q => new QuestionSelectionViewModel
+            {
+                QuestionId = q.QuestionId,
+                QuestionText = q.QuestionText
+            }).ToList();
+
             return View(model);
         }
 
@@ -147,6 +182,24 @@ namespace Online_Examination_System.Controllers
             await _examRepository.ToggleStatusAsync(id);
             TempData["SuccessMessage"] = "Exam status updated.";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Results(int id)
+        {
+            var exam = await _examRepository.GetByIdAsync(id);
+            if (exam == null) return NotFound();
+
+            var results = await _examRepository.GetResultsAsync(id);
+
+            var model = new AdminExamResultViewModel
+            {
+                ExamId = id,
+                ExamTitle = exam.ExamTitle,
+                Results = results.ToList()
+            };
+
+            return View(model);
         }
     }
 }

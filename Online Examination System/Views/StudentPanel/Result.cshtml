@@ -58,6 +58,10 @@
                                 <span class="text-muted fw-bold">Passing Marks</span>
                                 <span class="text-dark fw-bold">@Model.PassingMarks</span>
                             </li>
+                            <li class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                                <span class="text-muted fw-bold"><i class="bi bi-award-fill text-warning me-1"></i> Your Rank</span>
+                                <span class="text-dark fw-bold">@Model.Rank <span class="text-muted small">out of @Model.TotalParticipants</span></span>
+                            </li>
                         </ul>
                     </div>
 
@@ -92,7 +96,86 @@
                         <div>Exam Finished: @Model.ExamFinishDate.Value.ToString("MMM dd, yyyy hh:mm tt")</div>
                     }
                 </div>
+
+                @if (Model.PassStatus == "PASS")
+                {
+                    <div class="mt-5 text-center">
+                        <button id="btnDownloadCert" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow">
+                            <i class="bi bi-file-earmark-pdf-fill me-2"></i> Download Certificate
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
+
+<!-- Hidden Certificate Template -->
+<div id="certificateTemplate" style="display: none;">
+    <div style="width: 800px; height: 600px; padding: 20px; text-align: center; border: 10px solid #787878; border-radius: 10px; background-color: #fff; font-family: 'Georgia', serif; position: relative;">
+        <div style="position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px solid #d4af37; border-radius: 5px;"></div>
+        <div style="padding-top: 50px;">
+            <i class="bi bi-award-fill" style="font-size: 5rem; color: #d4af37;"></i>
+            <h1 style="font-size: 50px; font-weight: bold; margin-top: 20px; color: #333;">CERTIFICATE</h1>
+            <h2 style="font-size: 24px; font-style: italic; color: #666; margin-bottom: 40px;">OF ACHIEVEMENT</h2>
+            
+            <p style="font-size: 18px; color: #555;">This is to certify that</p>
+            <h3 style="font-size: 32px; font-weight: bold; color: #000; text-decoration: underline; margin-bottom: 30px;">
+                @User.Identity.Name
+            </h3>
+            
+            <p style="font-size: 18px; color: #555;">has successfully completed the exam</p>
+            <h4 style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px;">
+                @Model.ExamName
+            </h4>
+            
+            <p style="font-size: 18px; color: #555;">with a passing score of <strong>@Model.ResultPercentage.ToString("0.##")%</strong>.</p>
+            
+            <div style="margin-top: 50px; display: flex; justify-content: space-between; padding: 0 100px;">
+                <div style="text-align: center;">
+                    <div style="border-bottom: 1px solid #333; width: 150px; margin-bottom: 5px; height: 30px; font-family: 'Courier New', Courier, monospace;">
+                        @DateTime.Now.ToString("dd MMM yyyy")
+                    </div>
+                    <span style="font-size: 14px; color: #777;">Date of Issue</span>
+                </div>
+                <div style="text-align: center;">
+                    <div style="border-bottom: 1px solid #333; width: 150px; margin-bottom: 5px; height: 30px; font-family: 'Courier New', Courier, monospace; font-style: italic;">
+                        OES Admin
+                    </div>
+                    <span style="font-size: 14px; color: #777;">Authorized Signature</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Include html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var btnDownload = document.getElementById('btnDownloadCert');
+            if (btnDownload) {
+                btnDownload.addEventListener('click', function () {
+                    var element = document.getElementById('certificateTemplate');
+                    // Temporarily show the element to render it
+                    element.style.display = 'block';
+
+                    var opt = {
+                        margin:       0,
+                        filename:     'Certificate_@(Model.ExamName.Replace(" ", "_")).pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2 },
+                        jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+                    };
+
+                    // New Promise-based usage:
+                    html2pdf().set(opt).from(element.children[0]).save().then(function() {
+                        // Hide it again
+                        element.style.display = 'none';
+                    });
+                });
+            }
+        });
+    </script>
+}

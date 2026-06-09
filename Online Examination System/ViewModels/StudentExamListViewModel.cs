@@ -11,5 +11,7 @@ namespace Online_Examination_System.ViewModels
         public int WrongAnswers { get; set; }
         public string Status { get; set; }
         public decimal ResultPercentage { get; set; }
+        public System.DateTime? StartDateTime { get; set; }
+        public System.DateTime? EndDateTime { get; set; }
     }
 }

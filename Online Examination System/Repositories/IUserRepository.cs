@@ -6,6 +6,8 @@ namespace Online_Examination_System.Repositories
     {
         Task<User> GetUserByLoginAsync(string usernameOrEmail);
         Task<int> RegisterStudentAsync(User student);
+        Task<User> GetUserByEmailAsync(string email);
+        Task UpdatePasswordAsync(int userId, string newPasswordHash);
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User> GetByIdAsync(int userId);
         Task UpdateUserAsync(User user, int updatedBy);

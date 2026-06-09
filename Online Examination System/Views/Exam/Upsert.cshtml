@@ -59,6 +59,24 @@
                         </div>
                     </div>
 
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="NegativeMark" class="form-label fw-bold text-danger"></label> <span class="text-danger">*</span>
+                            <input asp-for="NegativeMark" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="NegativeMark" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="StartDateTime" class="form-label fw-bold"></label>
+                            <input asp-for="StartDateTime" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="StartDateTime" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="EndDateTime" class="form-label fw-bold"></label>
+                            <input asp-for="EndDateTime" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="EndDateTime" class="text-danger small"></span>
+                        </div>
+                    </div>
+
                     <div class="mb-2 form-check form-switch">
                         <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="activeSwitch">
                         <label class="form-check-label fw-bold text-dark" for="activeSwitch">Exam is Active</label>
@@ -74,20 +92,32 @@
                 <div class="card-body">
                     <p class="text-muted small mb-3">Select exactly the number of questions specified in "No Of Questions" above.</p>
                     
-                    <div class="row">
-                        @for (int i = 0; i < Model.AvailableQuestions.Count; i++)
-                        {
-                            <div class="col-md-12 mb-2">
-                                <div class="form-check p-3 border rounded-3 bg-light hover-shadow-sm transition-all">
-                                    <input type="hidden" asp-for="AvailableQuestions[i].QuestionId" />
-                                    <input type="hidden" asp-for="AvailableQuestions[i].QuestionText" />
-                                    <input asp-for="AvailableQuestions[i].IsSelected" class="form-check-input ms-1 me-3 question-checkbox" type="checkbox" id="q_@i" onchange="updateSelectedCount()">
-                                    <label class="form-check-label w-100" for="q_@i">
-                                        <span class="fw-bold text-dark">Q@(i + 1):</span> @Model.AvailableQuestions[i].QuestionText
-                                    </label>
-                                </div>
-                            </div>
-                        }
+                    <input type="hidden" asp-for="SelectedQuestionIds" id="SelectedQuestionIds" />
+
+                    <div class="table-responsive">
+                        <table class="table table-hover border" id="questionsTable" width="100%" cellspacing="0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;" class="text-center">Select</th>
+                                    <th>Question ID</th>
+                                    <th>Question Text</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var q in Model.AvailableQuestions)
+                                {
+                                    <tr>
+                                        <td class="text-center align-middle">
+                                            <input class="form-check-input question-checkbox" type="checkbox" value="@q.QuestionId" id="q_@q.QuestionId">
+                                        </td>
+                                        <td class="align-middle fw-bold text-muted">@q.QuestionId</td>
+                                        <td class="align-middle">
+                                            <label class="mb-0 w-100" for="q_@q.QuestionId" style="cursor: pointer;">@q.QuestionText</label>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -105,6 +135,64 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
+        // Global Set to track selected IDs across DataTables pagination
+        let selectedQuestions = new Set();
+        let table;
+
+        function initTracking() {
+            // Pre-populate Set from hidden field if it has values (Edit Mode)
+            let existingIdsStr = document.getElementById('SelectedQuestionIds').value;
+            if (existingIdsStr) {
+                let ids = existingIdsStr.split(',');
+                ids.forEach(id => {
+                    if (id.trim() !== '') {
+                        selectedQuestions.add(parseInt(id));
+                    }
+                });
+            }
+
+            // Initialize DataTable
+            table = $('#questionsTable').DataTable({
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "order": [[1, "desc"]], // Order by ID descending by default
+                "columnDefs": [
+                    { "orderable": false, "targets": 0 } // Disable sorting on checkbox column
+                ]
+            });
+
+            // Handle checkbox changes across all pages
+            $('#questionsTable tbody').on('change', '.question-checkbox', function() {
+                var qId = parseInt($(this).val());
+                if(this.checked){
+                    selectedQuestions.add(qId);
+                } else {
+                    selectedQuestions.delete(qId);
+                }
+                updateSelectedCount();
+            });
+
+            // Ensure checkboxes reflect Set state when page changes (draw event)
+            table.on('draw', function() {
+                updateCheckboxesUI();
+            });
+
+            // Initial UI update
+            updateCheckboxesUI();
+        }
+
+        function updateCheckboxesUI() {
+            // Check the checkboxes that are in the Set
+            $('.question-checkbox').each(function() {
+                let qId = parseInt($(this).val());
+                if (selectedQuestions.has(qId)) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        }
+
         function calculateTotal() {
             var noOfQ = parseFloat(document.getElementById('noOfQuestions').value) || 0;
             var perMark = parseFloat(document.getElementById('perQuestionMark').value) || 0;
@@ -115,12 +203,7 @@
         }
 
         function updateSelectedCount() {
-            var checkboxes = document.querySelectorAll('.question-checkbox');
-            var selected = 0;
-            checkboxes.forEach(function(cb) {
-                if (cb.checked) selected++;
-            });
-            
+            var selected = selectedQuestions.size;
             var required = parseInt(document.getElementById('noOfQuestions').value) || 0;
             var badge = document.getElementById('selectedCountBadge');
             
@@ -147,12 +230,7 @@
                 document.getElementById('passingMarkError').classList.add('d-none');
             }
             
-            var checkboxes = document.querySelectorAll('.question-checkbox');
-            var selected = 0;
-            checkboxes.forEach(function(cb) {
-                if (cb.checked) selected++;
-            });
-            
+            var selected = selectedQuestions.size;
             var required = parseInt(document.getElementById('noOfQuestions').value) || 0;
             
             if (selected !== required) {
@@ -160,12 +238,16 @@
                 return false;
             }
             
+            // Populate the hidden field with comma-separated IDs
+            document.getElementById('SelectedQuestionIds').value = Array.from(selectedQuestions).join(',');
+            
             return true;
         }
 
         // Run on load
         document.addEventListener("DOMContentLoaded", function() {
             calculateTotal();
+            initTracking();
         });
     </script>
     

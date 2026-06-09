@@ -1,0 +1,70 @@
+@model Online_Examination_System.ViewModels.AdminExamResultViewModel
+@{
+    ViewData["Title"] = "Exam Results";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Results: @Model.ExamTitle</h1>
+    <a href="@Url.Action("Index", "Exam")" class="d-none d-sm-inline-block btn btn-sm btn-outline-secondary shadow-sm rounded-pill px-3 py-2">
+        <i class="bi bi-arrow-left fa-sm me-1"></i> Back to Exams
+    </a>
+</div>
+
+<div class="card premium-card mb-4 shadow-sm border-0">
+    <div class="card-header py-3 bg-white border-0 border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Student Results</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 border-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sr</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Attempted</th>
+                        <th class="text-success">Correct</th>
+                        <th class="text-danger">Wrong</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Finished Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Results != null && Model.Results.Any())
+                    {
+                        int sr = 1;
+                        foreach (var res in Model.Results)
+                        {
+                            <tr>
+                                <td class="fw-bold text-muted">@sr</td>
+                                <td><div class="fw-bold text-dark">@res.StudentName</div></td>
+                                <td>@res.StudentEmail</td>
+                                <td>@res.TotalAttempted</td>
+                                <td class="text-success fw-bold">@res.TotalRight</td>
+                                <td class="text-danger fw-bold">@res.TotalWrong</td>
+                                <td class="fw-bold">@res.Score</td>
+                                <td>
+                                    <span class="badge @(res.ResultPercentage >= 40 ? "bg-success" : "bg-danger") rounded-pill px-3 py-2">
+                                        @res.ResultPercentage.ToString("0.##")%
+                                    </span>
+                                </td>
+                                <td>@res.CompletionDate.ToString("dd MMM yyyy, hh:mm tt")</td>
+                            </tr>
+                            sr++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                No student has completed this exam yet.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

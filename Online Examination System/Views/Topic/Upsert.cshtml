@@ -1,0 +1,295 @@
+@model Online_Examination_System.ViewModels.TopicUpsertViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Create Topic" : "Edit Topic";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">@(Model.Id == 0 ? "Create New Topic" : "Edit Topic")</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Topics
+    </a>
+</div>
+
+<form asp-action="Upsert" method="post" id="topicForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row">
+        <!-- Main Topic Details -->
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card premium-card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-0 border-bottom">
+                    <h6 class="m-0 font-weight-bold text-primary">Topic Master</h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label asp-for="SessionId" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                        <select asp-for="SessionId" asp-items="Model.SessionList" class="form-select" id="SessionId" required>
+                            <option disabled selected value="">-- Select Session --</option>
+                        </select>
+                        <span asp-validation-for="SessionId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ChapterId" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                        <select asp-for="ChapterId" asp-items="Model.ChapterList" class="form-select" id="ChapterId" required>
+                            <option disabled selected value="">-- Select Chapter --</option>
+                        </select>
+                        <span asp-validation-for="ChapterId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-bold"></label> <span class="text-danger">*</span>
+                        <input asp-for="Title" class="form-control" placeholder="Topic Title" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-bold">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-6">
+                            <label asp-for="DurationMin" class="form-label fw-bold"></label>
+                            <input asp-for="DurationMin" class="form-control" type="number" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="TopicPosition" class="form-label fw-bold"></label>
+                            <input asp-for="TopicPosition" class="form-control" type="number" />
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 form-check form-switch fs-5">
+                        <input asp-for="Status" class="form-check-input" type="checkbox" role="switch" id="activeSwitch">
+                        <label class="form-check-label fw-bold text-dark fs-6 mt-1 ms-2" for="activeSwitch">Active</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic Content Configuration -->
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card premium-card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-0 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Content Configuration</h6>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="mb-4">
+                        <label asp-for="TopicType" class="form-label fw-bold fs-5 text-dark"></label> <span class="text-danger">*</span>
+                        <select asp-for="TopicType" class="form-select form-select-lg border-primary" id="TopicType" required>
+                            <option value="General">General (Single Resource)</option>
+                            <option value="Accordion">Accordion (Multiple Sections)</option>
+                            <option value="Multi Slider">Multi Slider (Multiple Media)</option>
+                        </select>
+                    </div>
+
+                    <hr />
+
+                    <!-- General Section -->
+                    <div id="generalSection">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark"></i> Single Resource Details</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="TopicFileType" class="form-label fw-bold">File Type</label>
+                                <select asp-for="TopicFileType" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    <option value="PDF">PDF Document</option>
+                                    <option value="Video">Video (MP4)</option>
+                                    <option value="YouTube">YouTube Link</option>
+                                    <option value="Image">Image</option>
+                                    <option value="URL">External URL</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="TopicFilePath" class="form-label fw-bold">File Path / URL</label>
+                                <input asp-for="TopicFilePath" class="form-control" placeholder="https://..." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Details Section -->
+                    <div id="dynamicSection" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold m-0"><i class="bi bi-collection"></i> Dynamic Topic Details</h6>
+                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" id="btnAddDetail">
+                                <i class="bi bi-plus-lg"></i> Add Row
+                            </button>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle" id="detailsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 25%">Title</th>
+                                        <th style="width: 25%">File Type</th>
+                                        <th style="width: 30%">File Path / URL</th>
+                                        <th style="width: 10%">Pos</th>
+                                        <th style="width: 10%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.TopicDetails.Count; i++)
+                                    {
+                                        <tr class="detail-row @(Model.TopicDetails[i].IsDeleted ? "d-none" : "")">
+                                            <td>
+                                                <input type="hidden" name="TopicDetails.Index" value="@i" />
+                                                <input type="hidden" asp-for="TopicDetails[i].Id" />
+                                                <input type="hidden" asp-for="TopicDetails[i].IsDeleted" class="is-deleted-input" />
+                                                <input asp-for="TopicDetails[i].Title" class="form-control form-control-sm" required />
+                                            </td>
+                                            <td>
+                                                <select asp-for="TopicDetails[i].FileType" class="form-select form-select-sm">
+                                                    <option value="PDF">PDF</option>
+                                                    <option value="Video">Video</option>
+                                                    <option value="YouTube">YouTube</option>
+                                                    <option value="Image">Image</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input asp-for="TopicDetails[i].FilePath" class="form-control form-control-sm" />
+                                            </td>
+                                            <td>
+                                                <input asp-for="TopicDetails[i].Position" class="form-control form-control-sm" type="number" />
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger btn-remove-row"><i class="bi bi-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div id="noDetailsMsg" class="text-muted text-center p-3 @(Model.TopicDetails.Count > 0 ? "d-none" : "")">
+                                No details added yet. Click "Add Row" to start.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-5 text-end">
+        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow fw-bold">
+            <i class="bi bi-save me-1"></i> Save Topic
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            
+            // 1. Cascading Dropdown for Session -> Chapter
+            $('#SessionId').change(function() {
+                var sessionId = $(this).val();
+                var chapterDropdown = $('#ChapterId');
+                
+                chapterDropdown.empty();
+                chapterDropdown.append('<option disabled selected value="">-- Loading... --</option>');
+                
+                if(sessionId) {
+                    $.ajax({
+                        url: '@Url.Action("GetChaptersBySession", "Topic")',
+                        type: 'GET',
+                        data: { sessionId: sessionId },
+                        success: function(data) {
+                            chapterDropdown.empty();
+                            if(data.length > 0) {
+                                chapterDropdown.append('<option disabled selected value="">-- Select Chapter --</option>');
+                                $.each(data, function(index, item) {
+                                    chapterDropdown.append($('<option></option>').val(item.value).text(item.text));
+                                });
+                            } else {
+                                chapterDropdown.append('<option disabled selected value="">-- No Chapters Available --</option>');
+                            }
+                        },
+                        error: function() {
+                            chapterDropdown.empty();
+                            chapterDropdown.append('<option disabled selected value="">-- Error loading chapters --</option>');
+                        }
+                    });
+                }
+            });
+
+            // 2. Toggle UI based on Topic Type
+            function toggleTopicTypeUI() {
+                var type = $('#TopicType').val();
+                if (type === 'General') {
+                    $('#generalSection').slideDown();
+                    $('#dynamicSection').slideUp();
+                    // Optional: remove required from dynamic fields
+                } else {
+                    $('#generalSection').slideUp();
+                    $('#dynamicSection').slideDown();
+                }
+            }
+
+            $('#TopicType').change(toggleTopicTypeUI);
+            toggleTopicTypeUI(); // Run on load
+
+            // 3. Dynamic Rows Logic
+            var detailIndex = @Model.TopicDetails.Count;
+
+            $('#btnAddDetail').click(function() {
+                $('#noDetailsMsg').addClass('d-none');
+                
+                var newRow = `
+                    <tr class="detail-row">
+                        <td>
+                            <input type="hidden" name="TopicDetails.Index" value="${detailIndex}" />
+                            <input type="hidden" name="TopicDetails[${detailIndex}].Id" value="0" />
+                            <input type="hidden" name="TopicDetails[${detailIndex}].IsDeleted" value="false" class="is-deleted-input" />
+                            <input name="TopicDetails[${detailIndex}].Title" class="form-control form-control-sm" required placeholder="Detail Title" />
+                        </td>
+                        <td>
+                            <select name="TopicDetails[${detailIndex}].FileType" class="form-select form-select-sm">
+                                <option value="PDF">PDF</option>
+                                <option value="Video">Video</option>
+                                <option value="YouTube">YouTube</option>
+                                <option value="Image">Image</option>
+                                <option value="URL">External URL</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input name="TopicDetails[${detailIndex}].FilePath" class="form-control form-control-sm" placeholder="URL or Path" />
+                        </td>
+                        <td>
+                            <input name="TopicDetails[${detailIndex}].Position" class="form-control form-control-sm" type="number" value="${$('#detailsTable tbody tr:not(.d-none)').length + 1}" />
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-danger btn-remove-row"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                $('#detailsTable tbody').append(newRow);
+                detailIndex++;
+            });
+
+            $(document).on('click', '.btn-remove-row', function() {
+                var row = $(this).closest('tr');
+                
+                // If it has a real DB Id (value > 0), mark IsDeleted = true and hide
+                var idInput = row.find('input[name$=".Id"]');
+                if (idInput.length > 0 && idInput.val() !== "0") {
+                    row.find('.is-deleted-input').val('true');
+                    row.addClass('d-none');
+                    // Remove required attributes so form can submit
+                    row.find('input, select').removeAttr('required');
+                } else {
+                    // It's a new unsaved row, just remove it entirely
+                    row.remove();
+                }
+
+                // Show empty message if all rows are hidden/removed
+                if ($('#detailsTable tbody tr:not(.d-none)').length === 0) {
+                    $('#noDetailsMsg').removeClass('d-none');
+                }
+            });
+        });
+    </script>
+}

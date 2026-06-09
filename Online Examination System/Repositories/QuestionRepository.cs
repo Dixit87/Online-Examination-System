@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Online_Examination_System.Data;
 using Online_Examination_System.Models;
+using Online_Examination_System.ViewModels;
 
 namespace Online_Examination_System.Repositories
 {
@@ -104,6 +105,14 @@ namespace Online_Examination_System.Repositories
             await connection.ExecuteAsync(
                 "sp_QuestionToggleStatus",
                 new { QuestionId = id },
+                commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<IEnumerable<QuestionAnalyticsViewModel>> GetQuestionAnalyticsAsync()
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            return await connection.QueryAsync<QuestionAnalyticsViewModel>(
+                "sp_AdminGetQuestionAnalytics",
                 commandType: CommandType.StoredProcedure);
         }
     }

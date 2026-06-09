@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Bulk Question Upload";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">Bulk Question Upload</h1>
+    <a href="@Url.Action("Index", "Question")" class="d-none d-sm-inline-block btn btn-sm btn-outline-secondary shadow-sm rounded-pill px-3 py-2">
+        <i class="bi bi-arrow-left fa-sm me-1"></i> Back to Questions
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card premium-card shadow-sm border-0 mb-4">
+            <div class="card-header py-3 bg-white border-0 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Upload Excel File (.xlsx)</h6>
+            </div>
+            <div class="card-body p-4">
+                
+                <div class="alert alert-info shadow-sm rounded-3 mb-4">
+                    <h6 class="fw-bold"><i class="bi bi-info-circle-fill me-2"></i> Instructions</h6>
+                    <p class="mb-2">Please upload an Excel file with the following column structure (Header in Row 1):</p>
+                    <ul class="mb-0 small">
+                        <li><strong>Column A:</strong> Question Text</li>
+                        <li><strong>Column B:</strong> Option 1</li>
+                        <li><strong>Column C:</strong> Option 2</li>
+                        <li><strong>Column D:</strong> Option 3</li>
+                        <li><strong>Column E:</strong> Option 4</li>
+                        <li><strong>Column F:</strong> Correct Option Number (1, 2, 3, or 4)</li>
+                    </ul>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @Html.ValidationSummary(false, "", new { @class = "mb-0 list-unstyled" })
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-action="BulkUpload" method="post" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="file" class="form-label fw-bold text-dark">Select Excel File</label>
+                        <input type="file" class="form-control form-control-lg rounded-3" id="file" name="file" accept=".xlsx" required>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="@Url.Action("Index", "Question")" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="bi bi-cloud-arrow-up-fill me-2"></i> Upload Questions
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

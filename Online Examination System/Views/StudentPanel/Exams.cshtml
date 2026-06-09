@@ -7,6 +7,14 @@
     <h1 class="h3 mb-0 text-gray-800 font-weight-800">Exam List</h1>
 </div>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="card premium-card mb-4 shadow-sm border-0">
     <div class="card-header py-3 bg-white border-0 border-bottom">
         <h6 class="m-0 font-weight-bold text-primary">Available Exams</h6>
@@ -18,6 +26,7 @@
                     <tr>
                         <th>Sr</th>
                         <th>Exam</th>
+                        <th>Window</th>
                         <th>Total Questions</th>
                         <th>Attempted</th>
                         <th>Right</th>
@@ -36,6 +45,19 @@
                             <tr>
                                 <td class="fw-bold text-muted">@sr</td>
                                 <td><div class="fw-bold text-dark">@exam.ExamTitle</div></td>
+                                <td>
+                                    @if(exam.StartDateTime.HasValue || exam.EndDateTime.HasValue)
+                                    {
+                                        <div class="small">
+                                            @if(exam.StartDateTime.HasValue) { <div><i class="bi bi-play-circle text-success"></i> @exam.StartDateTime.Value.ToString("dd MMM yyyy, hh:mm tt")</div> }
+                                            @if(exam.EndDateTime.HasValue) { <div><i class="bi bi-stop-circle text-danger"></i> @exam.EndDateTime.Value.ToString("dd MMM yyyy, hh:mm tt")</div> }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Always Open</span>
+                                    }
+                                </td>
                                 <td>@exam.TotalQuestions</td>
                                 <td>@exam.Attempted</td>
                                 <td class="text-success fw-bold">@exam.RightAnswers</td>

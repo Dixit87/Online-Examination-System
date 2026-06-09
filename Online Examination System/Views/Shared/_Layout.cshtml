@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Online_Examination_System.styles.css" asp-append-version="true" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
 </head>
 <body>
     <div class="wrapper">
@@ -56,6 +58,24 @@
                             <i class="bi bi-person-video2"></i> Manage Students
                         </a>
                     </li>
+                    <hr class="dropdown-divider border-white opacity-25 mx-3 my-2" />
+                    <p class="sidebar-heading mt-2">Course Materials</p>
+                    <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Session" ? "active" : "")">
+                        <a href="@Url.Action("Index", "Session")" class="nav-link">
+                            <i class="bi bi-calendar3"></i> Manage Sessions
+                        </a>
+                    </li>
+                    <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Chapter" ? "active" : "")">
+                        <a href="@Url.Action("Index", "Chapter")" class="nav-link">
+                            <i class="bi bi-journal-bookmark-fill"></i> Manage Chapters
+                        </a>
+                    </li>
+                    <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Topic" ? "active" : "")">
+                        <a href="@Url.Action("Index", "Topic")" class="nav-link">
+                            <i class="bi bi-file-earmark-text"></i> Manage Topics
+                        </a>
+                    </li>
+                    <hr class="dropdown-divider border-white opacity-25 mx-3 my-2" />
                     <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" ? "active" : "")">
                         <a href="@Url.Action("Users", "Admin")" class="nav-link">
                             <i class="bi bi-people-fill"></i> Manage Users
@@ -72,6 +92,11 @@
                     <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "StudentPanel" && ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
                         <a href="@Url.Action("Dashboard", "StudentPanel")" class="nav-link">
                             <i class="bi bi-grid-1x2-fill"></i> Student Dashboard
+                        </a>
+                    </li>
+                    <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "StudentPanel" && ViewContext.RouteData.Values["Action"]?.ToString() == "Sessions" ? "active" : "")">
+                        <a href="@Url.Action("Sessions", "StudentPanel")" class="nav-link">
+                            <i class="bi bi-journal-richtext"></i> Course Materials
                         </a>
                     </li>
                     <li class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "StudentPanel" && ViewContext.RouteData.Values["Action"]?.ToString() == "Exams" ? "active" : "")">
@@ -159,6 +184,9 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     
     <!-- Sidebar Toggle Script -->

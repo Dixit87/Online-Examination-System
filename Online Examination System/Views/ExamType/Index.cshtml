@@ -24,7 +24,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 border-white">
+            <table id="dataTable" class="table table-hover align-middle mb-0 border-white">
                 <thead class="table-light">
                     <tr>
                         <th>ID</th>
@@ -56,14 +56,20 @@
                             </tr>
                         }
                     }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center py-4">No exam types found.</td>
-                        </tr>
-                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable({
+                "pageLength": 10,
+                "ordering": true,
+                "info": true
+            });
+        });
+    </script>
+}

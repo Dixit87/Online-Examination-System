@@ -13,6 +13,8 @@ namespace Online_Examination_System.ViewModels
         public int TotalAttemptedQuestions { get; set; }
         public int TotalCorrectAnswers { get; set; }
         public int TotalWrongAnswers { get; set; }
+        public int Rank { get; set; }
+        public int TotalParticipants { get; set; }
         public decimal ResultPercentage { get; set; }
         public decimal Score { get; set; }
         public DateTime ExamStartDate { get; set; }

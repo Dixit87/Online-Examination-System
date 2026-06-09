@@ -57,6 +57,9 @@ namespace Online_Examination_System.Repositories
             parameters.Add("@PerQuestionMark", exam.PerQuestionMark);
             parameters.Add("@TotalMark", exam.TotalMark);
             parameters.Add("@PassingMark", exam.PassingMark);
+            parameters.Add("@NegativeMark", exam.NegativeMark);
+            parameters.Add("@StartDateTime", exam.StartDateTime);
+            parameters.Add("@EndDateTime", exam.EndDateTime);
             parameters.Add("@IsActive", exam.IsActive);
             parameters.Add("@UserId", exam.CreatedBy);
 
@@ -108,6 +111,18 @@ namespace Online_Examination_System.Repositories
             await connection.ExecuteAsync(
                 "sp_ExamToggleStatus",
                 new { ExamId = id },
+                commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<IEnumerable<Online_Examination_System.ViewModels.AdminExamResultItemViewModel>> GetResultsAsync(int examId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            var parameters = new DynamicParameters();
+            parameters.Add("@ExamId", examId);
+
+            return await connection.QueryAsync<Online_Examination_System.ViewModels.AdminExamResultItemViewModel>(
+                "sp_ExamGetResults",
+                parameters,
                 commandType: CommandType.StoredProcedure);
         }
     }

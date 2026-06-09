@@ -4,15 +4,52 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<div id="fullscreenOverlay" class="position-fixed w-100 h-100 top-0 start-0 bg-white d-flex flex-column align-items-center justify-content-center z-3">
+    <div class="text-center p-5 rounded shadow-lg" style="background: #f8f9fa;">
+        <i class="bi bi-shield-lock-fill text-primary" style="font-size: 4rem;"></i>
+        <h2 class="mt-3 fw-bold">Proctored Examination</h2>
+        <p class="text-muted">This exam requires Full-Screen mode. Navigating away or switching tabs will result in a warning.</p>
+        <p class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> After 3 warnings, the exam will automatically submit.</p>
+        <button id="btnEnterFullscreen" class="btn btn-primary btn-lg rounded-pill px-5 mt-3 shadow">
+            Start Exam in Full-Screen
+        </button>
+    </div>
+</div>
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800 font-weight-800">@Model.ExamTitle</h1>
-    <div class="text-muted fw-bold">
-        Question <span id="currentQuestionNum">1</span> of @Model.TotalQuestions
+    <div class="d-flex align-items-center gap-3">
+        <div class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm d-none" id="warningBadge">
+            Warnings: <span id="warningCount">0</span>/3
+        </div>
+        <div class="text-muted fw-bold">
+            Question <span id="currentQuestionNum">1</span> of @Model.TotalQuestions
+        </div>
     </div>
 </div>
 
 <div class="row justify-content-center">
-    <div class="col-lg-10">
+    <div class="col-lg-3 mb-4">
+        <!-- Question Navigator -->
+        <div class="card premium-card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Question Navigator</h6>
+            </div>
+            <div class="card-body">
+                <div id="questionNavigator" class="d-flex flex-wrap gap-2">
+                    <!-- Buttons will be injected here -->
+                </div>
+                <hr />
+                <div class="small text-muted">
+                    <div class="d-flex align-items-center gap-2 mb-1"><span class="badge bg-light text-dark border p-2" style="width:25px">&nbsp;</span> Unattempted</div>
+                    <div class="d-flex align-items-center gap-2 mb-1"><span class="badge bg-primary p-2" style="width:25px">&nbsp;</span> Attempted</div>
+                    <div class="d-flex align-items-center gap-2"><span class="badge bg-warning text-dark p-2" style="width:25px">&nbsp;</span> Flagged for Review</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
         <div class="card premium-card shadow-sm border-0 mb-4">
             
             <!-- Loading Indicator -->
@@ -24,11 +61,19 @@
             </div>
 
             <!-- Exam Content -->
-            <div id="examContent" style="display: none;">
+            <div id="examContent" style="display: none; filter: blur(4px); pointer-events: none;">
                 <div class="card-body p-5">
-                    <h4 class="font-weight-bold text-dark mb-4" id="questionText">
-                        <!-- Question text will be injected here -->
-                    </h4>
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <h4 class="font-weight-bold text-dark w-75" id="questionText">
+                            <!-- Question text will be injected here -->
+                        </h4>
+                        <div class="form-check form-switch fs-5">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flagReviewSwitch">
+                            <label class="form-check-label text-warning fw-bold" for="flagReviewSwitch">
+                                <i class="bi bi-flag-fill"></i> Flag
+                            </label>
+                        </div>
+                    </div>
 
                     <div id="optionsContainer" class="d-flex flex-column gap-3">
                         <!-- Options will be injected here -->
@@ -62,12 +107,88 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
             let questions = [];
             let currentIndex = 0;
+            let warnings = 0;
+            let isExamActive = false;
             const studentExamId = @Model.StudentExamId;
             const examId = @Model.ExamId;
+
+            // --- ANTI-CHEATING LOGIC ---
+            $('#btnEnterFullscreen').click(function() {
+                const docElm = document.documentElement;
+                if (docElm.requestFullscreen) {
+                    docElm.requestFullscreen();
+                } else if (docElm.webkitRequestFullscreen) {
+                    docElm.webkitRequestFullscreen();
+                } else if (docElm.msRequestFullscreen) {
+                    docElm.msRequestFullscreen();
+                }
+            });
+
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+            function handleFullscreenChange() {
+                if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                    // Entered Fullscreen
+                    $('#fullscreenOverlay').removeClass('d-flex').addClass('d-none');
+                    $('#examContent').css({'filter': 'none', 'pointer-events': 'auto'});
+                    $('#warningBadge').removeClass('d-none');
+                    isExamActive = true;
+                } else {
+                    // Exited Fullscreen
+                    if (isExamActive) {
+                        $('#fullscreenOverlay').removeClass('d-none').addClass('d-flex');
+                        $('#examContent').css({'filter': 'blur(4px)', 'pointer-events': 'none'});
+                        isExamActive = false;
+                        triggerWarning("You exited full-screen mode!");
+                    }
+                }
+            }
+
+            // Tab switch / Blur detection
+            window.addEventListener('blur', function() {
+                if (isExamActive) {
+                    triggerWarning("You switched tabs or minimized the browser!");
+                }
+            });
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && isExamActive) {
+                    triggerWarning("You switched tabs or minimized the browser!");
+                }
+            });
+
+            function triggerWarning(reason) {
+                warnings++;
+                $('#warningCount').text(warnings);
+                if (warnings >= 3) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Exam Terminated',
+                        text: 'You have reached the maximum number of warnings. Your exam will now be submitted automatically.',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        timer: 3000
+                    }).then(() => {
+                        $('#submitExamForm').submit();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Warning ' + warnings + ' of 3',
+                        text: reason + ' Do not navigate away from the exam window.',
+                        confirmButtonText: 'I Understand',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            }
+            // --- END ANTI-CHEATING ---
+
 
             // Fetch Data
             $.ajax({
@@ -75,10 +196,16 @@
                 type: 'GET',
                 data: { studentExamId: studentExamId, examId: examId },
                 success: function (data) {
-                    questions = data;
+                    // Add local properties for flag and attempt state
+                    questions = data.map(q => ({
+                        ...q,
+                        isFlagged: false
+                    }));
+
                     if (questions.length > 0) {
                         $('#loadingIndicator').hide();
                         $('#examContent').show();
+                        buildNavigator();
                         renderQuestion();
                     } else {
                         $('#loadingIndicator').html('<h5 class="text-danger">No questions found for this exam.</h5>');
@@ -89,10 +216,46 @@
                 }
             });
 
+            function buildNavigator() {
+                let html = '';
+                for(let i=0; i<questions.length; i++) {
+                    html += `<button type="button" class="btn btn-outline-secondary btn-sm nav-btn" style="width: 35px;" data-idx="${i}">${i+1}</button>`;
+                }
+                $('#questionNavigator').html(html);
+
+                $('.nav-btn').click(function() {
+                    currentIndex = parseInt($(this).data('idx'));
+                    renderQuestion();
+                });
+                updateNavigatorColors();
+            }
+
+            function updateNavigatorColors() {
+                $('.nav-btn').each(function(i) {
+                    let q = questions[i];
+                    $(this).removeClass('btn-outline-secondary btn-primary btn-warning text-dark border-2');
+                    
+                    if (q.isFlagged) {
+                        $(this).addClass('btn-warning text-dark');
+                    } else if (q.savedOptionId > 0) {
+                        $(this).addClass('btn-primary');
+                    } else {
+                        $(this).addClass('btn-outline-secondary');
+                    }
+
+                    if (i === currentIndex) {
+                        $(this).addClass('border-2 border-dark fw-bold');
+                    }
+                });
+            }
+
             function renderQuestion() {
                 const q = questions[currentIndex];
                 $('#currentQuestionNum').text(currentIndex + 1);
                 $('#questionText').text(q.questionText);
+
+                // Set Flag state
+                $('#flagReviewSwitch').prop('checked', q.isFlagged);
 
                 let optionsHtml = '';
                 q.options.forEach(function (opt) {
@@ -123,18 +286,22 @@
                     $('#btnNext').show();
                 }
                 
-                // Hide save status on new question render
                 $('#saveStatus').hide();
+                updateNavigatorColors();
                 
-                // Bind click event to radios for auto-save
+                // Bind events
                 $('.option-radio').change(function() {
                     let selectedOptionId = $(this).val();
                     saveAnswer(q.questionId, selectedOptionId);
                 });
             }
 
+            $('#flagReviewSwitch').change(function() {
+                questions[currentIndex].isFlagged = $(this).is(':checked');
+                updateNavigatorColors();
+            });
+
             function saveAnswer(questionId, selectedOptionId) {
-                // Show saving indicator if desired
                 $('#saveStatus').html('<i class="bi bi-arrow-repeat text-warning me-1"></i> Saving...').show();
                 
                 $.ajax({
@@ -147,13 +314,12 @@
                         selectedOptionId: parseInt(selectedOptionId)
                     }),
                     success: function () {
-                        // Update local array so it's remembered when navigating back
                         questions[currentIndex].savedOptionId = parseInt(selectedOptionId);
                         $('#saveStatus').html('<i class="bi bi-cloud-check-fill text-success me-1"></i> Saved').fadeIn().delay(2000).fadeOut();
+                        updateNavigatorColors();
                     },
                     error: function () {
                         $('#saveStatus').html('<i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Save Failed').show();
-                        alert('Failed to save answer. Please check your internet connection.');
                     }
                 });
             }
@@ -191,5 +357,6 @@
             border-color: #0d6efd !important;
             background-color: #f0f7ff;
         }
+        .nav-btn { font-weight: bold; }
     </style>
 }

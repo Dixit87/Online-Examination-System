@@ -150,6 +150,58 @@ namespace Online_Examination_System.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userRepository.GetUserByEmailAsync(model.Email);
+            if (user != null)
+            {
+                // Real world: generate token, send email. 
+                // For this project: We just redirect to Reset Password and pass the email in TempData or query string to simulate.
+                return RedirectToAction("ResetPassword", new { email = model.Email });
+            }
+
+            ModelState.AddModelError("", "No active user found with this email.");
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string email)
+        {
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login");
+            
+            return View(new ResetPasswordViewModel { Email = email });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userRepository.GetUserByEmailAsync(model.Email);
+            if (user != null)
+            {
+                string newHash = HashPassword(model.Password);
+                await _userRepository.UpdatePasswordAsync(user.UserId, newHash);
+
+                TempData["SuccessMessage"] = "Password has been reset successfully. Please login.";
+                return RedirectToAction("Login");
+            }
+
+            ModelState.AddModelError("", "No active user found with this email.");
+            return View(model);
+        }
+
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

@@ -46,6 +46,22 @@ namespace Online_Examination_System.Repositories
             return parameters.Get<int>("@UserId");
         }
 
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            return await connection.QuerySingleOrDefaultAsync<User>(
+                "SELECT * FROM Users WHERE Email = @Email AND IsActive = 1",
+                new { Email = email });
+        }
+
+        public async Task UpdatePasswordAsync(int userId, string newPasswordHash)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.ExecuteAsync(
+                "UPDATE Users SET PasswordHash = @PasswordHash, UpdatedDate = GETDATE() WHERE UserId = @UserId",
+                new { PasswordHash = newPasswordHash, UserId = userId });
+        }
+
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             using var connection = _connectionFactory.CreateConnection();

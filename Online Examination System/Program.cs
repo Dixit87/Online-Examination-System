@@ -18,6 +18,9 @@ namespace Online_Examination_System
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddScoped<IChapterRepository, ChapterRepository>();
+            builder.Services.AddScoped<ITopicRepository, TopicRepository>();
 
             // Configure Authentication
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -36,10 +39,16 @@ namespace Online_Examination_System
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseExceptionHandler("/Error/500");
                 app.UseHsts();
             }
+            else
+            {
+                // In development, also use our custom error pages for testing (optional, but good for seeing the premium design)
+                app.UseExceptionHandler("/Error/500");
+            }
+
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseHttpsRedirection();
             app.UseRouting();

@@ -11,5 +11,6 @@ namespace Online_Examination_System.Repositories
         Task<int> UpsertExamAsync(Exam exam);
         Task UpsertExamQuestionsAsync(int examId, List<int> questionIds);
         Task ToggleStatusAsync(int id);
+        Task<IEnumerable<Online_Examination_System.ViewModels.AdminExamResultItemViewModel>> GetResultsAsync(int examId);
     }
 }

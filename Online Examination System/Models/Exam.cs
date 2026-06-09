@@ -13,6 +13,9 @@ namespace Online_Examination_System.Models
         public decimal PerQuestionMark { get; set; }
         public decimal TotalMark { get; set; }
         public decimal PassingMark { get; set; }
+        public decimal NegativeMark { get; set; }
+        public DateTime? StartDateTime { get; set; }
+        public DateTime? EndDateTime { get; set; }
         public bool IsActive { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }

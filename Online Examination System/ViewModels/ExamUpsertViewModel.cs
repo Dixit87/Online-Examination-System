@@ -35,9 +35,21 @@ namespace Online_Examination_System.ViewModels
         [Display(Name = "Passing Mark")]
         public decimal PassingMark { get; set; }
 
+        [Required(ErrorMessage = "Negative Mark is required")]
+        [Display(Name = "Negative Mark (per wrong answer)")]
+        public decimal NegativeMark { get; set; }
+
+        [Display(Name = "Start Time (Optional)")]
+        public System.DateTime? StartDateTime { get; set; }
+
+        [Display(Name = "End Time (Optional)")]
+        public System.DateTime? EndDateTime { get; set; }
+
         public bool IsActive { get; set; } = true;
 
-        // For the checkboxes
+        // For the checkboxes tracking via JavaScript
+        public string SelectedQuestionIds { get; set; }
+
         [Microsoft.AspNetCore.Mvc.ModelBinding.Validation.ValidateNever]
         public List<QuestionSelectionViewModel> AvailableQuestions { get; set; } = new List<QuestionSelectionViewModel>();
     }
@@ -46,6 +58,5 @@ namespace Online_Examination_System.ViewModels
     {
         public int QuestionId { get; set; }
         public string QuestionText { get; set; }
-        public bool IsSelected { get; set; }
     }
 }

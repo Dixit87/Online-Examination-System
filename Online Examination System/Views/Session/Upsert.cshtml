@@ -1,0 +1,56 @@
+@model Online_Examination_System.Models.Session
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Create Session" : "Edit Session";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800 font-weight-800">@(Model.Id == 0 ? "Create New Session" : "Edit Session")</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Sessions
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-xl-8 col-lg-10 mx-auto">
+        <div class="card premium-card mb-4 shadow-sm border-0">
+            <div class="card-header py-3 bg-white border-0 border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary">Session Details</h6>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Upsert" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-bold">Session Title</label> <span class="text-danger">*</span>
+                        <input asp-for="Title" class="form-control" placeholder="E.g., Summer 2026 Mathematics" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-bold">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Brief description of the session"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4 form-check form-switch fs-5">
+                        <input asp-for="Status" class="form-check-input" type="checkbox" role="switch" id="activeSwitch">
+                        <label class="form-check-label fw-bold text-dark fs-6 mt-1 ms-2" for="activeSwitch">Session is Active</label>
+                    </div>
+
+                    <hr class="mb-4" />
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold">
+                            <i class="bi bi-save me-1"></i> Save Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

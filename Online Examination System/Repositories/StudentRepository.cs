@@ -102,9 +102,17 @@ namespace Online_Examination_System.Repositories
             var questions = (await multi.ReadAsync<ExamQuestionPayload>()).ToList();
             var options = (await multi.ReadAsync<ExamOptionPayload>()).ToList();
 
+            var random = new System.Random();
+
+            // Shuffle questions
+            questions = questions.OrderBy(q => random.Next()).ToList();
+
             foreach (var q in questions)
             {
-                q.Options = options.Where(o => o.QuestionId == q.QuestionId).ToList();
+                // Assign and shuffle options for each question
+                q.Options = options.Where(o => o.QuestionId == q.QuestionId)
+                                   .OrderBy(o => random.Next())
+                                   .ToList();
             }
 
             return questions;
@@ -142,10 +150,27 @@ namespace Online_Examination_System.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@StudentExamId", studentExamId);
 
-            return await connection.QuerySingleOrDefaultAsync<ExamResultViewModel>(
+            var result = await connection.QuerySingleOrDefaultAsync<ExamResultViewModel>(
                 "sp_StudentGetExamResult",
                 parameters,
                 commandType: CommandType.StoredProcedure);
+
+            if (result != null)
+            {
+                // Fetch Rank and TotalParticipants
+                var rankData = await connection.QuerySingleOrDefaultAsync(
+                    "sp_StudentGetExamRank",
+                    new { StudentExamId = studentExamId },
+                    commandType: CommandType.StoredProcedure);
+
+                if (rankData != null)
+                {
+                    result.Rank = (int)rankData.StudentRank;
+                    result.TotalParticipants = (int)rankData.TotalParticipants;
+                }
+            }
+
+            return result;
         }
     }
 }
